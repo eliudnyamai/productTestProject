@@ -10,7 +10,7 @@ class ProductController extends Controller
     public function index()
     {
         $data = json_decode(Storage::get('products.json'), true) ?? [];
-        
+
         return response()->json(['data' => $data]);
     }
 
@@ -37,13 +37,25 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'data' => $data]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        // Logic to update an existing product by ID
+        $index = (int) $request->index;
+        $data = json_decode(Storage::get('products.json'), true) ?? [];
+
+        if (!isset($data[$index])) {
+            return response()->json(['error' => 'Product not found'], 404);
+        }
+
+        $data[$index]['product_name'] = $request->product_name;
+        $data[$index]['quantity'] = (int) $request->quantity;
+        $data[$index]['price'] = (float) $request->price;
+        $data[$index]['total'] = $data[$index]['quantity'] * $data[$index]['price'];
+        Storage::put('products.json', json_encode($data, JSON_PRETTY_PRINT));
+        return response()->json(['success' => true]);
     }
 
     public function destroy($id)
     {
-        // Logic to delete a product by ID
+        
     }
 }
